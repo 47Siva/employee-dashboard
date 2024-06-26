@@ -26,121 +26,121 @@ public class OvertimeAnalysis {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
-	@Column(name = "\"Job Code\"", columnDefinition = "text")
+	@Column(name = "job_code",columnDefinition = "text")
 	private String jobCode;
 
-	@Column(name = "\"Job Name\"", columnDefinition = "text")
+	@Column(name = "job_name",columnDefinition = "text")
 	private String jobName;
 
-	@Column(name = "\"Phase Code\"", columnDefinition = "text")
+	@Column(name = "phase_code",columnDefinition = "text")
 	private String phaseCode;
 
-	@Column(name = "\"Phase Name\"", columnDefinition = "text")
+	@Column(name = "phase_name",columnDefinition = "text")
 	private String phaseName;
 
-	@Column(name = "\"Project Code\"", columnDefinition = "text")
+	@Column(name = "project_code",columnDefinition = "text")
 	private String projectCode;
 
-	@Column(name = "\"Project Name\"", columnDefinition = "text")
+	@Column(name = "project_name",columnDefinition = "text")
 	private String projectName;
 
-	@Column(name = "\"Estimated-Hours\"", columnDefinition = "text")
+	@Column(name = "estimated_hours",columnDefinition = "text")
 	private String estimatedHours;
 
-	@Column(name = "\"Status\"", columnDefinition = "text")
+	@Column(name = "status",columnDefinition = "text")
 	private String status;
 
-	@Column(name = "\"User ID\"")
-	private Integer userId;
+	@Column(name = "user_id")
+	private int userId;
 
-	@Column(name = "\"User Name\"", columnDefinition = "text")
+	@Column(name = "user_name",columnDefinition = "text")
 	private String userName;
 
-	@Column(name = "\"attendance-date\"", columnDefinition = "text")
+	@Column(name = "attendance_date",columnDefinition = "text")
 	private String attendanceDate;
 
-	@Column(name = "\"Job Hours\"", columnDefinition = "text")
+	@Column(name = "job_hours",columnDefinition = "text")
 	private String jobHours;
 
-	@Column(name = "\"Job Count\"")
+	@Column(name = "job_count")
 	private Double jobCount;
 
-	@Column(name = "\"ot1\"", columnDefinition = "text")
+	@Column(name = "ot1",columnDefinition = "text")
 	private String ot1;
 
-	@Column(name = "\"ot2\"", columnDefinition = "text")
+	@Column(name = "ot2",columnDefinition = "text")
 	private String ot2;
 
-	@Column(name = "\"Clocked Hours\"")
+	@Column(name = "clocked_hours")
 	private Float clockedHours;
 
-	@Column(name = "\"Overtime_Hours\"")
+	@Column(name = "overtime_hours",columnDefinition = "text")
 	private Float overtimeHours;
 
-	@Column(name = "\"department-name\"", columnDefinition = "text")
+	@Column(name = "department_name",columnDefinition = "text")
 	private String departmentName;
 
-	@Column(name = "\"designation\"", columnDefinition = "text")
+	@Column(name = "designation",columnDefinition = "text")
 	private String designation;
 
-	@Column(name = "\"designation-name\"", columnDefinition = "text")
+	@Column(name = "designation_name",columnDefinition = "text")
 	private String designationName;
 
-	@Column(name = "\"organization-name\"", columnDefinition = "text")
+	@Column(name = "organization_name",columnDefinition = "text")
 	private String organizationName;
 
-	@Column(name = "\"grade-name\"", columnDefinition = "text")
+	@Column(name = "grade_name",columnDefinition = "text")
 	private String gradeName;
 
-	@Column(name = "\"section-name\"", columnDefinition = "text")
+	@Column(name = "section_name",columnDefinition = "text")
 	private String sectionName;
 
-	@Column(name = "\"category-name\"", columnDefinition = "text")
+	@Column(name = "category_name",columnDefinition = "text")
 	private String categoryName;
 
-	@Column(name = "\"branch-name\"", columnDefinition = "text")
+	@Column(name = "branch_name",columnDefinition = "text")
 	private String branchName;
 
-	@Column(name = "\"Cost Per Hour\"")
+	@Column(name = "cost_per_hour")
 	private Float costPerHour;
 
-	@Column(name = "\"Cost Incurred\"")
+	@Column(name = "cost_incurred")
 	private Float costIncurred;
 
-	@Column(name = "\"ProjectID\"", columnDefinition = "text")
+	@Column(name = "project_id",columnDefinition = "text")
 	private String projectId;
 
-	@Column(name = "\"max-end-date\"")
+	@Column(name = "max_end_date")
 	private LocalDate maxEndDate;
 
-	@Column(name = "\"Project Status\"", columnDefinition = "text")
+	@Column(name = "project_status",columnDefinition = "text")
 	private String projectStatus;
 
-	@Column(name = "\"HasProjectStarted\"", columnDefinition = "text")
+	@Column(name = "has_project_started",columnDefinition = "text")
 	private String hasProjectStarted;
 
-	@Column(name = "\"Active Project\"")
+	@Column(name = "active_project")
 	private Float activeProject;
 
-	@Column(name = "\"Created Datetime\"")
+	@Column(name = "created_datetime")
 	private LocalDateTime createdDatetime;
 
-	@Column(name = "\"Start Date Time\"")
+	@Column(name = "start_date_time")
 	private LocalDateTime startDateTime;
 
-	@Column(name = "\"End Date Time\"")
+	@Column(name = "end_date_time")
 	private LocalDateTime endDateTime;
 
-	@Column(name = "\"ProcessDate\"")
+	@Column(name = "process_date")
 	private LocalDateTime processDate;
 
-	@Column(name = "\"FHSHS\"", columnDefinition = "text")
+	@Column(name = "fhshs",columnDefinition = "text")
 	private String fhshs;
 
-	@Column(name = "\"Day\"", columnDefinition = "text")
+	@Column(name = "day",columnDefinition = "text")
 	private String day;
 
-	@Column(name = "\"Overtime-Percent\"", columnDefinition = "text")
+	@Column(name = "overtime_percent",columnDefinition = "text")
 	private String overtimePercent;
 
 }

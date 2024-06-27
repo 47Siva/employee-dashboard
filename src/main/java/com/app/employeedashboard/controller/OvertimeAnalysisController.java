@@ -27,38 +27,37 @@ public class OvertimeAnalysisController {
 
 	@GetMapping("/get/{id}")
 	public ResponseEntity<?> getemployee(@PathVariable int id) {
-		return overtimeAnalysisService.getemployee(id);
+		return overtimeAnalysisService.getEmployee(id);
 	}
 
 	@GetMapping("/getall")
 	public ResponseEntity<?> getallemployee() {
-		return overtimeAnalysisService.getallemployee();
+		return overtimeAnalysisService.getallEmployee();
 	}
 
 	@GetMapping("/overtime-howrs")
-	public ResponseEntity<?> getOverTimeHoursBasedDate(@RequestParam String fromDate, @RequestParam String toDate) {
+	public ResponseEntity<?> getOverTimeHoursBasedDate(@RequestParam(required = false) String fromDate, @RequestParam (required = false) String toDate) {
 		return overtimeAnalysisService.getOverTimeHoursBasedDate(fromDate, toDate);
 	}
 
 	@GetMapping("/employees-with-overtime")
-	public ResponseEntity<?> getEmployeesWithOvertimeBasedDate(@RequestParam String fromDate,
-			@RequestParam String toDate) {
+	public ResponseEntity<?> getEmployeesWithOvertimeBasedDate(@RequestParam (required = false) String fromDate,
+			@RequestParam (required = false) String toDate) {
 		return overtimeAnalysisService.getEmployeesWithOvertimeBasedDate(fromDate, toDate);
 	}
 	
     @GetMapping("/total-cost-incurred")
-    public ResponseEntity<?> getTotalCostIncurred(@RequestParam String fromDate, @RequestParam String toDate) {
+    public ResponseEntity<?> getTotalCostIncurred(@RequestParam (required = false) String fromDate, @RequestParam (required = false) String toDate) {
         return overtimeAnalysisService.getTotalCostIncurred(fromDate, toDate);
     }
 
     @GetMapping("/overtime-percentage")
-    public ResponseEntity<?> getOvertimePercentage(@RequestParam String fromDate, @RequestParam String toDate) {
+    public ResponseEntity<?> getOvertimePercentage(@RequestParam (required = false) String fromDate, @RequestParam (required = false) String toDate) {
         return overtimeAnalysisService.getOvertimePercentage(fromDate, toDate);
     }
     
-//    @PostMapping("/total-hours")
-//    public ResponseEntity<Long> getTotalOvertimeHours(@RequestBody OvertimeAnalysisDto dto) {
-//        long totalOvertimeHours = overtimeAnalysisService.calculateTotalOvertimeHours(dto);
-//        return ResponseEntity.ok(totalOvertimeHours);
-//    }
+    @GetMapping("/Overtimer-hours-overview")
+    public ResponseEntity<?> getTotalOvertimeHours(@RequestParam (required = false) String fromDate, @RequestParam  (required = false) String toDate) {
+        return overtimeAnalysisService.OvertimeOverviewMetrics(fromDate,toDate);
+    }
 }

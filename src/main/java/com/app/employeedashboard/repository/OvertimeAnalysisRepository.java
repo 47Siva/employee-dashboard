@@ -13,25 +13,19 @@ import com.app.employeedashboard.entity.OvertimeAnalysis;
 
 @Repository
 public interface OvertimeAnalysisRepository extends JpaRepository<OvertimeAnalysis, Integer> {
-	
+
 	@Query("SELECT SUM(oa.overtimeHours) FROM OvertimeAnalysis oa WHERE oa.attendanceDate BETWEEN :fromDate AND :toDate")
-    float getOverTimeHoursBasedDate(
-            @Param("fromDate") String fromDate,
-            @Param("toDate") String toDate
-    );
-	
-    @Query("SELECT COUNT(DISTINCT oa.userId) FROM OvertimeAnalysis oa WHERE oa.attendanceDate BETWEEN :fromDate AND :toDate")
-    int getEmployeesWithOvertimeBasedDate(
-            @Param("fromDate") String fromDate,
-            @Param("toDate") String toDate
-    );
-    
-    @Query("SELECT SUM(oa.overtimeHours * 15) FROM OvertimeAnalysis oa WHERE oa.attendanceDate BETWEEN :fromDate AND :toDate")
-    float getTotalCostIncurred(@Param("fromDate") String fromDate, @Param("toDate") String toDate);
-    
-    @Query("SELECT SUM(oa.estimatedHours) FROM OvertimeAnalysis oa WHERE oa.attendanceDate BETWEEN :fromDate AND :toDate")
-    float getTotalEstimatedHours(@Param("fromDate") String fromDate, @Param("toDate") String toDate);
-    
+	Double getOverTimeHoursBasedDate(@Param("fromDate") String fromDate, @Param("toDate") String toDate);
+
+	@Query("SELECT COUNT(DISTINCT oa.userId) FROM OvertimeAnalysis oa WHERE oa.attendanceDate BETWEEN :fromDate AND :toDate")
+	int getEmployeesWithOvertimeBasedDate(@Param("fromDate") String fromDate, @Param("toDate") String toDate);
+
+	@Query("SELECT SUM(oa.overtimeHours * 15) FROM OvertimeAnalysis oa WHERE oa.attendanceDate BETWEEN :fromDate AND :toDate")
+	Double getTotalCostIncurred(@Param("fromDate") String fromDate, @Param("toDate") String toDate);
+
+	@Query(value = "SELECT SUM(CASE WHEN estimated_hours = '' THEN 0.0 ELSE EXTRACT(EPOCH FROM CAST(estimated_hours AS interval)) / 3600.0 END) FROM overtime_analysis WHERE attendance_date BETWEEN :fromDate AND :toDate", nativeQuery = true)
+	Double getTotalEstimatedHours(@Param("fromDate") String fromDate, @Param("toDate") String toDate);
+
 //	 @Query("SELECT SUM(eo.overtimeHours) FROM EmployeeOvertime eo WHERE " +
 //	            "eo.date BETWEEN :fromDate AND :toDate AND " +
 //	            "eo.organizationName = :organizationName AND " +
@@ -50,7 +44,5 @@ public interface OvertimeAnalysisRepository extends JpaRepository<OvertimeAnalys
 //	                                     String designationName, String gradeName, String sectionName, 
 //	                                     String projectName, String phaseName, String jobName, 
 //	                                     String employeeName);
-
-
 
 }

@@ -16,12 +16,12 @@ import com.app.employeedashboard.dto.ErrorResponse;
 @RestControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler{
 
-	@ExceptionHandler(RuntimeException.class)
-	public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
-		ErrorResponse errors = new ErrorResponse();
-		errors.setErrorList((Stream.of(ex.getMessage().split(",")).collect(Collectors.toList())));
-		errors.setReason(ex.getMessage());
-		errors.setCode(HttpStatus.BAD_REQUEST.toString());
-		return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
-	}
+//	@ExceptionHandler(RuntimeException.class)
+//	public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
+//		ErrorResponse errors = new ErrorResponse();
+//		errors.setErrorList((Stream.of(ex.getMessage().split(",")).collect(Collectors.toList())));
+//		errors.setReason(ex.getMessage());
+//		errors.setCode(HttpStatus.BAD_REQUEST.toString());
+//		return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+//	}
 }

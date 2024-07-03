@@ -11,7 +11,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class OvertimeAnalysisDto {
+public class OvertimeAnalysisRequest {
 
 	  private String fromDate ;
 	  private String toDate;

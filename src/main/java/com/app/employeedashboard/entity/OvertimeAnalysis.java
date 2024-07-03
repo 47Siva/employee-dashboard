@@ -24,7 +24,8 @@ public class OvertimeAnalysis {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	@Column(name = "id",columnDefinition = "Integer")
+	private Integer id;
 
 	@Column(name = "job_code",columnDefinition = "text")
 	private String jobCode;

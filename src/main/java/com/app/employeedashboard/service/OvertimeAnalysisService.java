@@ -2,17 +2,20 @@ package com.app.employeedashboard.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.app.employeedashboard.calculation.OvertimeCalculation;
 import com.app.employeedashboard.dto.OverTimeAnalysisinList;
-import com.app.employeedashboard.dto.OvertimeData;
+import com.app.employeedashboard.dto.OvertimeAnalysisRequest;
 import com.app.employeedashboard.dto.OvertimeOverviewDto;
 import com.app.employeedashboard.dto.ResponseDto;
 import com.app.employeedashboard.entity.OvertimeAnalysis;
@@ -24,6 +27,9 @@ public class OvertimeAnalysisService {
 
 	@Autowired
 	private OvertimeAnalysisRepository overtimeAnalysisRepository;
+	
+	@Autowired
+	public OvertimeCalculation overtimeCalculation ;
 
 	public ResponseEntity<?> getEmployee(int id) {
 		Optional<OvertimeAnalysis> optional = overtimeAnalysisRepository.findById(id);
@@ -154,6 +160,41 @@ public class OvertimeAnalysisService {
 		}
 	}
 
+	public ResponseEntity<?> OvertimeOverviewMetricsFilter(OvertimeAnalysisRequest request) {
+		Map<String, Object> responmap = new HashMap<>();
+
+		// Prepare filters based on request fields
+		String fromDate = request.getFromDate();
+		String toDate = request.getToDate();
+		String organizationName = request.getOrganizationName();
+		String branchName = request.getBranchName();
+		String departmentName = request.getDepartmentName();
+		String categoryName = request.getCategoryName();
+		String designationName = request.getDesignationName();
+		String gradeName = request.getGradeName();
+		String sectionName = request.getSectionName();
+		String projectName = request.getProjectName();
+		String phaseName = request.getPhaseName();
+		String jobName = request.getJobName();
+		String employeeName = request.getEmployeeName();
+
+		List<OvertimeAnalysis> overtimeData = overtimeAnalysisRepository.findByFilters(fromDate, toDate,
+				organizationName, branchName, departmentName, categoryName, designationName, gradeName, sectionName,
+				projectName, phaseName, jobName, employeeName);
+
+		float totalOvertimeHours =overtimeCalculation.calculateTotalOvertimeHours(overtimeData);
+		long totalEmployeesWithOvertime = overtimeCalculation.calculateTotalEmployeesWithOvertime(overtimeData);
+		double totalCostIncurred = overtimeCalculation.calculateTotalCostIncurred(overtimeData);
+		double totalOvertimePercentage =overtimeCalculation.calculateTotalOvertimePercentage(overtimeData);
+		
+		OvertimeOverviewDto overtimeOverviewDto = OvertimeOverviewDto.builder()
+				.totalOvertimeHours(totalOvertimeHours)
+				.totalOvertimeHours(totalEmployeesWithOvertime)
+				.totalCastincurred(totalCostIncurred)
+				.totalOvertimepercentage(totalOvertimePercentage).build();
+		return ResponseEntity.ok(overtimeOverviewDto);
+	}
+
 	public ResponseEntity<?> getTotalProjectBasedDate(String fromDate, String toDate) {
 		Map<String, Object> map = new HashMap<>();
 		ResponseDto responseDto = new ResponseDto();
@@ -186,12 +227,12 @@ public class OvertimeAnalysisService {
 
 			for (String project : projectList) {
 				if (project != null && !project.isEmpty()) {
-					float totalOvertimeHours = calculateTotalOvertimeHoursByProject(overtimeList, project);
-					Float percentWorkingDay = calculatePercentageByDayTypeForProject(daysList, "Working Day",
+					float totalOvertimeHours = overtimeCalculation.calculateTotalOvertimeHoursByProject(overtimeList, project);
+					Float percentWorkingDay = overtimeCalculation.calculatePercentageByDayTypeForProject(daysList, "Working Day",
 							totalOvertimeHours, overtimeList, project);
-					Float percentPublicHoliday = calculatePercentageByDayTypeForProject(daysList, "Public Holiday",
+					Float percentPublicHoliday = overtimeCalculation.calculatePercentageByDayTypeForProject(daysList, "Public Holiday",
 							totalOvertimeHours, overtimeList, project);
-					Float percentWeekoff = calculatePercentageByDayTypeForProject(daysList, "Weekoff",
+					Float percentWeekoff = overtimeCalculation.calculatePercentageByDayTypeForProject(daysList, "Weekoff",
 							totalOvertimeHours, overtimeList, project);
 
 					Float totalPercentage = percentWorkingDay + percentPublicHoliday + percentWeekoff;
@@ -217,31 +258,6 @@ public class OvertimeAnalysisService {
 		}
 	}
 
-	private Float calculateTotalOvertimeHoursByProject(List<Float> overtimeList, String project) {
-		Float total = 0.0f;
-		for (Float item : overtimeList) {
-			total += item;
-		}
-		return total;
-	}
-
-	private Float calculatePercentageByDayTypeForProject(List<String> daysList, String dayType,
-			Float totalOvertimeHours, List<Float> overtimeList, String project) {
-		Float totalDayTypeHours = 0.0f;
-		for (String item : daysList) {
-			if (dayType.equals(item)) {
-				for (float item2 : overtimeList) {
-					totalDayTypeHours += item2;
-				}
-			}
-		}
-		if (totalOvertimeHours > 0) {
-			return (totalDayTypeHours / totalOvertimeHours) * 100;
-		} else {
-			return 0.0f;
-		}
-	}
-
 	public ResponseEntity<?> getPercentageOfProjects(String fromDate, String toDate) {
 		Map<String, Object> responseMap = new HashMap<>();
 		ResponseDto responseDto = new ResponseDto();
@@ -252,22 +268,21 @@ public class OvertimeAnalysisService {
 			List<Double> workinglist = new ArrayList<Double>();
 			List<Double> holidaylist = new ArrayList<Double>();
 			for (int i = 0; i < projectList.size(); i++) {
-					Double totalHours = overtimeAnalysisRepository.findCountOfDays(projectList.get(i), fromDate,
-							toDate);
-					Double totalweekofflist = overtimeAnalysisRepository.findOverTimeHoursByDay(projectList.get(i),
-							fromDate, toDate, "Weekoff");
-					Double totalworkdaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(projectList.get(i),
-							fromDate, toDate, "Working Day");
-					Double totalholidaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(projectList.get(i),
-							fromDate, toDate, "Public Holiday");
+				Double totalHours = overtimeAnalysisRepository.findCountOfDays(projectList.get(i), fromDate, toDate);
+				Double totalweekofflist = overtimeAnalysisRepository.findOverTimeHoursByDay(projectList.get(i),
+						fromDate, toDate, "Weekoff");
+				Double totalworkdaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(projectList.get(i),
+						fromDate, toDate, "Working Day");
+				Double totalholidaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(projectList.get(i),
+						fromDate, toDate, "Public Holiday");
 
-					Double percentWeekoff = calculatePercentage(totalweekofflist, totalHours);
-					Double percentWorkingDay = calculatePercentage(totalworkdaylist, totalHours);
-					Double percentPublicHoliday = calculatePercentage(totalholidaylist, totalHours);
+				Double percentWeekoff = calculatePercentage(totalweekofflist, totalHours);
+				Double percentWorkingDay = calculatePercentage(totalworkdaylist, totalHours);
+				Double percentPublicHoliday = calculatePercentage(totalholidaylist, totalHours);
 
-					weeklist.add(percentWeekoff);
-					workinglist.add(percentWorkingDay);
-					holidaylist.add(percentPublicHoliday);
+				weeklist.add(percentWeekoff);
+				workinglist.add(percentWorkingDay);
+				holidaylist.add(percentPublicHoliday);
 			}
 			responseMap.put("Projects", projectList);
 			responseMap.put("percentWorkingDay", workinglist);
@@ -290,7 +305,7 @@ public class OvertimeAnalysisService {
 		Double result = (hours / totalHours) * 100;
 		return result;
 	}
-	
+
 	public ResponseEntity<?> getPercentageOfEmployee(String fromDate, String toDate) {
 		Map<String, Object> responseMap = new HashMap<>();
 		ResponseDto responseDto = new ResponseDto();
@@ -301,22 +316,21 @@ public class OvertimeAnalysisService {
 			List<Double> workinglist = new ArrayList<Double>();
 			List<Double> holidaylist = new ArrayList<Double>();
 			for (int i = 0; i < employeeList.size(); i++) {
-					Double totalHours = overtimeAnalysisRepository.findCountOfDays(employeeList.get(i), fromDate,
-							toDate);
-					Double totalweekofflist = overtimeAnalysisRepository.findOverTimeHoursByDay(employeeList.get(i),
-							fromDate, toDate, "Weekoff");
-					Double totalworkdaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(employeeList.get(i),
-							fromDate, toDate, "Working Day");
-					Double totalholidaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(employeeList.get(i),
-							fromDate, toDate, "Public Holiday");
+				Double totalHours = overtimeAnalysisRepository.findCountOfDays(employeeList.get(i), fromDate, toDate);
+				Double totalweekofflist = overtimeAnalysisRepository.findOverTimeHoursByDay(employeeList.get(i),
+						fromDate, toDate, "Weekoff");
+				Double totalworkdaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(employeeList.get(i),
+						fromDate, toDate, "Working Day");
+				Double totalholidaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(employeeList.get(i),
+						fromDate, toDate, "Public Holiday");
 
-					Double percentWeekoff = calculatePercentage(totalweekofflist, totalHours);
-					Double percentWorkingDay = calculatePercentage(totalworkdaylist, totalHours);
-					Double percentPublicHoliday = calculatePercentage(totalholidaylist, totalHours);
+				Double percentWeekoff = calculatePercentage(totalweekofflist, totalHours);
+				Double percentWorkingDay = calculatePercentage(totalworkdaylist, totalHours);
+				Double percentPublicHoliday = calculatePercentage(totalholidaylist, totalHours);
 
-					weeklist.add(percentWeekoff);
-					workinglist.add(percentWorkingDay);
-					holidaylist.add(percentPublicHoliday);
+				weeklist.add(percentWeekoff);
+				workinglist.add(percentWorkingDay);
+				holidaylist.add(percentPublicHoliday);
 			}
 			responseMap.put("Employees", employeeList);
 			responseMap.put("percentWorkingDay", workinglist);
@@ -342,22 +356,21 @@ public class OvertimeAnalysisService {
 			List<Double> workinglist = new ArrayList<Double>();
 			List<Double> holidaylist = new ArrayList<Double>();
 			for (int i = 0; i < PhaseList.size(); i++) {
-					Double totalHours = overtimeAnalysisRepository.findCountOfDays(PhaseList.get(i), fromDate,
-							toDate);
-					Double totalweekofflist = overtimeAnalysisRepository.findOverTimeHoursByDay(PhaseList.get(i),
-							fromDate, toDate, "Weekoff");
-					Double totalworkdaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(PhaseList.get(i),
-							fromDate, toDate, "Working Day");
-					Double totalholidaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(PhaseList.get(i),
-							fromDate, toDate, "Public Holiday");
+				Double totalHours = overtimeAnalysisRepository.findCountOfDays(PhaseList.get(i), fromDate, toDate);
+				Double totalweekofflist = overtimeAnalysisRepository.findOverTimeHoursByDay(PhaseList.get(i), fromDate,
+						toDate, "Weekoff");
+				Double totalworkdaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(PhaseList.get(i), fromDate,
+						toDate, "Working Day");
+				Double totalholidaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(PhaseList.get(i), fromDate,
+						toDate, "Public Holiday");
 
-					Double percentWeekoff = calculatePercentage(totalweekofflist, totalHours);
-					Double percentWorkingDay = calculatePercentage(totalworkdaylist, totalHours);
-					Double percentPublicHoliday = calculatePercentage(totalholidaylist, totalHours);
+				Double percentWeekoff = calculatePercentage(totalweekofflist, totalHours);
+				Double percentWorkingDay = calculatePercentage(totalworkdaylist, totalHours);
+				Double percentPublicHoliday = calculatePercentage(totalholidaylist, totalHours);
 
-					weeklist.add(percentWeekoff);
-					workinglist.add(percentWorkingDay);
-					holidaylist.add(percentPublicHoliday);
+				weeklist.add(percentWeekoff);
+				workinglist.add(percentWorkingDay);
+				holidaylist.add(percentPublicHoliday);
 			}
 			responseMap.put("Phase", PhaseList);
 			responseMap.put("percentWorkingDay", workinglist);
@@ -372,7 +385,7 @@ public class OvertimeAnalysisService {
 			return ResponseEntity.badRequest().body(responseMap);
 		}
 	}
-	
+
 	public ResponseEntity<?> getPercentageOfjobs(String fromDate, String toDate) {
 		Map<String, Object> responseMap = new HashMap<>();
 		ResponseDto responseDto = new ResponseDto();
@@ -383,22 +396,21 @@ public class OvertimeAnalysisService {
 			List<Double> workinglist = new ArrayList<Double>();
 			List<Double> holidaylist = new ArrayList<Double>();
 			for (int i = 0; i < JobList.size(); i++) {
-					Double totalHours = overtimeAnalysisRepository.findCountOfDays(JobList.get(i), fromDate,
-							toDate);
-					Double totalweekofflist = overtimeAnalysisRepository.findOverTimeHoursByDay(JobList.get(i),
-							fromDate, toDate, "Weekoff");
-					Double totalworkdaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(JobList.get(i),
-							fromDate, toDate, "Working Day");
-					Double totalholidaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(JobList.get(i),
-							fromDate, toDate, "Public Holiday");
+				Double totalHours = overtimeAnalysisRepository.findCountOfDays(JobList.get(i), fromDate, toDate);
+				Double totalweekofflist = overtimeAnalysisRepository.findOverTimeHoursByDay(JobList.get(i), fromDate,
+						toDate, "Weekoff");
+				Double totalworkdaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(JobList.get(i), fromDate,
+						toDate, "Working Day");
+				Double totalholidaylist = overtimeAnalysisRepository.findOverTimeHoursByDay(JobList.get(i), fromDate,
+						toDate, "Public Holiday");
 
-					Double percentWeekoff = calculatePercentage(totalweekofflist, totalHours);
-					Double percentWorkingDay = calculatePercentage(totalworkdaylist, totalHours);
-					Double percentPublicHoliday = calculatePercentage(totalholidaylist, totalHours);
+				Double percentWeekoff = calculatePercentage(totalweekofflist, totalHours);
+				Double percentWorkingDay = calculatePercentage(totalworkdaylist, totalHours);
+				Double percentPublicHoliday = calculatePercentage(totalholidaylist, totalHours);
 
-					weeklist.add(percentWeekoff);
-					workinglist.add(percentWorkingDay);
-					holidaylist.add(percentPublicHoliday);
+				weeklist.add(percentWeekoff);
+				workinglist.add(percentWorkingDay);
+				holidaylist.add(percentPublicHoliday);
 			}
 			responseMap.put("Jobs", JobList);
 			responseMap.put("percentWorkingDay", workinglist);
@@ -413,5 +425,5 @@ public class OvertimeAnalysisService {
 			return ResponseEntity.badRequest().body(responseMap);
 		}
 	}
-	
+
 }

@@ -32,24 +32,33 @@ public interface OvertimeAnalysisRepository extends JpaRepository<OvertimeAnalys
 			+ "WHERE TO_DATE(oa.attendance_date, 'DD/MM/YYYY') BETWEEN TO_DATE(:fromDate, 'DD/MM/YYYY') AND TO_DATE(:toDate, 'DD/MM/YYYY')", nativeQuery = true)
 	List<OvertimeAnalysis> findByMaxEndDateBetween(@Param("fromDate") String fromDate, @Param("toDate") String toDate);
 
-//	 @Query("SELECT SUM(eo.overtimeHours) FROM EmployeeOvertime eo WHERE " +
-//	            "eo.date BETWEEN :fromDate AND :toDate AND " +
-//	            "eo.organizationName = :organizationName AND " +
-//	            "eo.branchName = :branchName AND " +
-//	            "eo.departmentName = :departmentName AND " +
-//	            "eo.categoryName = :categoryName AND " +
-//	            "eo.designationName = :designationName AND " +
-//	            "eo.gradeName = :gradeName AND " +
-//	            "eo.sectionName = :sectionName AND " +
-//	            "eo.projectName = :projectName AND " +
-//	            "eo.phaseName = :phaseName AND " +
-//	            "eo.jobName = :jobName AND " +
-//	            "eo.employeeName = :employeeName")
-//	    long calculateTotalOvertimeHours(String fromDate, String toDate, String organizationName, 
-//	                                     String branchName, String departmentName, String categoryName, 
-//	                                     String designationName, String gradeName, String sectionName, 
-//	                                     String projectName, String phaseName, String jobName, 
-//	                                     String employeeName);
+	@Query("SELECT oa FROM OvertimeAnalysis oa WHERE " +
+	           "(TO_DATE(oa.attendanceDate, 'DD/MM/YYYY') BETWEEN TO_DATE(:fromDate, 'DD/MM/YYYY') AND TO_DATE(:toDate, 'DD/MM/YYYY')) " +
+	           "AND (:organizationName IS NULL OR oa.organizationName = :organizationName) " +
+	           "AND (:branchName IS NULL OR oa.branchName = :branchName) " +
+	           "AND (:departmentName IS NULL OR oa.departmentName = :departmentName) " +
+	           "AND (:categoryName IS NULL OR oa.categoryName = :categoryName) " +
+	           "AND (:designationName IS NULL OR oa.designationName = :designationName) " +
+	           "AND (:gradeName IS NULL OR oa.gradeName = :gradeName) " +
+	           "AND (:sectionName IS NULL OR oa.sectionName = :sectionName) " +
+	           "AND (:projectName IS NULL OR oa.projectName = :projectName) " +
+	           "AND (:phaseName IS NULL OR oa.phaseName = :phaseName) " +
+	           "AND (:jobName IS NULL OR oa.jobName = :jobName) " +
+	           "AND (:userName IS NULL OR oa.userName = :userName) " +  // assuming userName is part of request DTO
+	           "ORDER BY oa.attendanceDate ASC")
+	    List<OvertimeAnalysis> findByFilters(@Param("fromDate") String fromDate,
+	                                         @Param("toDate") String toDate,
+	                                         @Param("organizationName") String organizationName,
+	                                         @Param("branchName") String branchName,
+	                                         @Param("departmentName") String departmentName,
+	                                         @Param("categoryName") String categoryName,
+	                                         @Param("designationName") String designationName,
+	                                         @Param("gradeName") String gradeName,
+	                                         @Param("sectionName") String sectionName,
+	                                         @Param("projectName") String projectName,
+	                                         @Param("phaseName") String phaseName,
+	                                         @Param("jobName") String jobName,
+	                                         @Param("userName") String userName);
 
 	@Query(value = "SELECT Distinct project_name as ProjectName , day as Day ,overtime_hours as OverTimeHours FROM overtime_analysis oa  WHERE oa.overtime_hours>0 AND TO_DATE(oa.attendance_date, 'DD/MM/YYYY') BETWEEN TO_DATE(:fromDate, 'DD/MM/YYYY') AND TO_DATE(:toDate, 'DD/MM/YYYY') AND oa.project_name IS NOT NULL AND oa.project_name != ''", nativeQuery = true)
 	List<OverTimeAnalysisinList> findAllProjectsBasedDate(String fromDate, String toDate);

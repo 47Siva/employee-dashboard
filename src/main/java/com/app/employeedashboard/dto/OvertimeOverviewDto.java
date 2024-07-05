@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 public class OvertimeOverviewDto {
 
 	private double totalOvertimeHours;
-    private long totalEmployeesWithOvertime;
-    private double totalCastincurred;
-    private double totalOvertimepercentage;
+    private int totalEmployeesWithOvertime;
+    private double totalCostIncurred;
+    private double totalOvertimePercentage;
 }

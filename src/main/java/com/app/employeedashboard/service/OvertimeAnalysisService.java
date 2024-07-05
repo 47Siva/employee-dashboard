@@ -27,9 +27,9 @@ public class OvertimeAnalysisService {
 
 	@Autowired
 	private OvertimeAnalysisRepository overtimeAnalysisRepository;
-	
+
 	@Autowired
-	public OvertimeCalculation overtimeCalculation ;
+	public OvertimeCalculation overtimeCalculation;
 
 	public ResponseEntity<?> getEmployee(int id) {
 		Optional<OvertimeAnalysis> optional = overtimeAnalysisRepository.findById(id);
@@ -144,8 +144,8 @@ public class OvertimeAnalysisService {
 			Double overtimePercentage = (overtimehowers / totalEstimatedHours) * 100;
 
 			OvertimeOverviewDto overtimeOverviewDto = OvertimeOverviewDto.builder().totalOvertimeHours(overtimehowers)
-					.totalEmployeesWithOvertime(employeesWithOvertime).totalCastincurred(totalCost)
-					.totalOvertimepercentage(overtimePercentage).build();
+					.totalEmployeesWithOvertime(employeesWithOvertime).totalCostIncurred(totalCost)
+					.totalOvertimePercentage(overtimePercentage).build();
 
 			if (overtimeOverviewDto != null) {
 				responseDto.setData(overtimeOverviewDto);
@@ -161,7 +161,8 @@ public class OvertimeAnalysisService {
 	}
 
 	public ResponseEntity<?> OvertimeOverviewMetricsFilter(OvertimeAnalysisRequest request) {
-		Map<String, Object> responmap = new HashMap<>();
+//		Map<String, Object> responmap = new HashMap<>();
+		ResponseDto responseDto = new ResponseDto();
 
 		// Prepare filters based on request fields
 		String fromDate = request.getFromDate();
@@ -182,17 +183,16 @@ public class OvertimeAnalysisService {
 				organizationName, branchName, departmentName, categoryName, designationName, gradeName, sectionName,
 				projectName, phaseName, jobName, employeeName);
 
-		float totalOvertimeHours =overtimeCalculation.calculateTotalOvertimeHours(overtimeData);
-		long totalEmployeesWithOvertime = overtimeCalculation.calculateTotalEmployeesWithOvertime(overtimeData);
+		Float totalOvertimeHours = overtimeCalculation.calculateTotalOvertimeHours(overtimeData);
+		int totalEmployeesWithOvertime = overtimeCalculation.calculateTotalEmployeesWithOvertime(overtimeData);
 		double totalCostIncurred = overtimeCalculation.calculateTotalCostIncurred(overtimeData);
-		double totalOvertimePercentage =overtimeCalculation.calculateTotalOvertimePercentage(overtimeData);
-		
-		OvertimeOverviewDto overtimeOverviewDto = OvertimeOverviewDto.builder()
-				.totalOvertimeHours(totalOvertimeHours)
-				.totalOvertimeHours(totalEmployeesWithOvertime)
-				.totalCastincurred(totalCostIncurred)
-				.totalOvertimepercentage(totalOvertimePercentage).build();
-		return ResponseEntity.ok(overtimeOverviewDto);
+		double totalOvertimePercentage = overtimeCalculation.calculateTotalOvertimePercentage(overtimeData);
+
+		OvertimeOverviewDto overtimeOverviewDto = OvertimeOverviewDto.builder().totalOvertimeHours(totalOvertimeHours)
+				.totalEmployeesWithOvertime(totalEmployeesWithOvertime).totalCostIncurred(totalCostIncurred)
+				.totalOvertimePercentage(totalOvertimePercentage).build();
+		responseDto.setData(overtimeOverviewDto);
+		return ResponseEntity.ok(responseDto);
 	}
 
 	public ResponseEntity<?> getTotalProjectBasedDate(String fromDate, String toDate) {
@@ -227,13 +227,14 @@ public class OvertimeAnalysisService {
 
 			for (String project : projectList) {
 				if (project != null && !project.isEmpty()) {
-					float totalOvertimeHours = overtimeCalculation.calculateTotalOvertimeHoursByProject(overtimeList, project);
-					Float percentWorkingDay = overtimeCalculation.calculatePercentageByDayTypeForProject(daysList, "Working Day",
-							totalOvertimeHours, overtimeList, project);
-					Float percentPublicHoliday = overtimeCalculation.calculatePercentageByDayTypeForProject(daysList, "Public Holiday",
-							totalOvertimeHours, overtimeList, project);
-					Float percentWeekoff = overtimeCalculation.calculatePercentageByDayTypeForProject(daysList, "Weekoff",
-							totalOvertimeHours, overtimeList, project);
+					float totalOvertimeHours = overtimeCalculation.calculateTotalOvertimeHoursByProject(overtimeList,
+							project);
+					Float percentWorkingDay = overtimeCalculation.calculatePercentageByDayTypeForProject(daysList,
+							"Working Day", totalOvertimeHours, overtimeList, project);
+					Float percentPublicHoliday = overtimeCalculation.calculatePercentageByDayTypeForProject(daysList,
+							"Public Holiday", totalOvertimeHours, overtimeList, project);
+					Float percentWeekoff = overtimeCalculation.calculatePercentageByDayTypeForProject(daysList,
+							"Weekoff", totalOvertimeHours, overtimeList, project);
 
 					Float totalPercentage = percentWorkingDay + percentPublicHoliday + percentWeekoff;
 

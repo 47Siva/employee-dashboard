@@ -12,7 +12,7 @@ import com.app.employeedashboard.entity.OvertimeAnalysis;
 
 @Service
 public class OvertimeCalculation {
-	
+
 	public Float calculateTotalOvertimeHoursByProject(List<Float> overtimeList, String project) {
 		Float total = 0.0f;
 		for (Float item : overtimeList) {
@@ -38,24 +38,24 @@ public class OvertimeCalculation {
 		}
 	}
 
-	public float calculateTotalOvertimeHours(List<OvertimeAnalysis> data) {
-		float totalOvertimeHours = 0.0f;
+	public Float calculateTotalOvertimeHours(List<OvertimeAnalysis> data) {
+		Float totalOvertimeHours = 0.0f;
 		for (OvertimeAnalysis analysis : data) {
 			Float overtimeHours = analysis.getOvertimeHours();
 			if (overtimeHours != null) {
-                totalOvertimeHours += overtimeHours.floatValue();
-            } else {
-            	totalOvertimeHours = 0.0f;
-            }
+				totalOvertimeHours += overtimeHours.floatValue();
+			} else {
+				totalOvertimeHours += 0.0f;
+			}
 //			totalOvertimeHours += Optional.ofNullable(analysis.getOvertimeHours()).orElse(0.0f);
 		}
 		return totalOvertimeHours;
 	}
 
-	public long calculateTotalEmployeesWithOvertime(List<OvertimeAnalysis> data) {
+	public int calculateTotalEmployeesWithOvertime(List<OvertimeAnalysis> data) {
 		Set<Integer> uniqueUserIds = new HashSet<>();
 		for (OvertimeAnalysis analysis : data) {
-			if (analysis.getOvertimeHours() > 0) {
+			if (analysis.getOvertimeHours() != null) {
 				uniqueUserIds.add(analysis.getUserId());
 			}
 		}
@@ -63,12 +63,14 @@ public class OvertimeCalculation {
 	}
 
 	public double calculateTotalCostIncurred(List<OvertimeAnalysis> data) {
-		double hourlyRate = 15.0; // Assuming $15 per overtime hour
+		int hourlyRate = 15; // Assuming $15 per overtime hour
 		double totalCostIncurred = 0.0;
 
 		for (OvertimeAnalysis analysis : data) {
-			float overtimeHours = analysis.getOvertimeHours();
-			totalCostIncurred += overtimeHours * hourlyRate;
+			if (analysis.getOvertimeHours() != null) {
+				float overtimeHours = analysis.getOvertimeHours();
+				totalCostIncurred += overtimeHours * hourlyRate;
+			}
 		}
 
 		return totalCostIncurred;
@@ -101,6 +103,11 @@ public class OvertimeCalculation {
 
 	private double parseEstimatedHours(String estimatedHoursText) {
 		// Example: "08:00"
+
+		if (estimatedHoursText == null || estimatedHoursText.isEmpty()) {
+			return 0.0; // Handle null or empty strings gracefully
+		}
+		
 		String[] parts = estimatedHoursText.split(":");
 		if (parts.length != 2) {
 			return 0.0; // Handle invalid format gracefully
